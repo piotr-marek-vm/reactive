@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 @Component
 public class GreetingsClient {
+
     private final WebClient webClient;
 
     public GreetingsClient(WebClient.Builder builder) {
