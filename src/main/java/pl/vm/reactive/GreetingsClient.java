@@ -1,10 +1,11 @@
 package pl.vm.reactive;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Locale;
 
 @Slf4j
 @Component
@@ -17,15 +18,23 @@ public class GreetingsClient {
     }
 
     @Scheduled(fixedDelay = 1000)
-    public void printGreetings() {
+    public void great() {
         this.webClient.get()
-                .uri("/hello")
-                .accept(MediaType.APPLICATION_JSON)
+                .uri("/languages")
                 .retrieve()
-                .bodyToMono(Greetings.class)
-                .subscribe(this::messageConsumer);
+                .bodyToFlux(Locale.class)
+                .subscribe(this::getLokalizedGreetings);
     }
 
+    private void getLokalizedGreetings(Locale language) {
+        this.webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/hello/{language}")
+                        .build(language))
+                .retrieve()
+                .bodyToFlux(Greetings.class)
+                .subscribe(this::messageConsumer);
+    }
 
     private void messageConsumer(Greetings greetings) {
         log.info(greetings.message());
